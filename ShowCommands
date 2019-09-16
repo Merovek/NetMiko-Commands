@@ -22,7 +22,6 @@ def iterativefilename():
         i = int(i)+1
     NewFile = open(path+'_'+str(i)+'.txt', "w+")
 
-
 #The CSV source file with a device list is read.
 with open(csvbestand, 'r') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=';')
@@ -33,10 +32,12 @@ with open(csvbestand, 'r') as csv_file:
             "password": password,
             "device_type": row[1]
         }
+        
 #The output file is created.
         OutputDeviceFile = (r'C:\Netmiko\Device-' +row[0] + '_1')
         iterativefilename()
         NewFile.write("==========Contains the show results of device" + row[0] + "============" +"\n\n")
+        
 #The connection to the device is made, the show commands performed and the results written to the file.
         net_connect = Netmiko(**device)
         for command in commandfile:
