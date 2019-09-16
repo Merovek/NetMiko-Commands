@@ -1,0 +1,50 @@
+#!/usr/bin/env python
+from netmiko import Netmiko
+from getpass import getpass, getuser
+import csv
+import os
+
+#Used information is defined.
+print(getuser())
+password = getpass()
+
+#Files are defined; 'csvbestand' as a source file for devices, 'commandfile' to perform show commands.
+csvbestand = r'C:\Netmiko\csvbestand.csv'
+commandfile = open(r'C:\Netmiko\commandfile.txt',encoding=('utf-8')).readlines()
+
+#A function is defined check if the destination filename already exists and, if it does, increase its filename number by one.
+def iterativefilename():
+    global NewFile
+    global i
+    i = 1
+    path,i = OutputDeviceFile.split("_")
+    while os.path.exists(path+'_'+str(i)+'.txt'):
+        i = int(i)+1
+    NewFile = open(path+'_'+str(i)+'.txt', "w+")
+
+
+#The CSV source file with a device list is read.
+with open(csvbestand, 'r') as csv_file:
+    csv_reader = csv.reader(csv_file, delimiter=';')
+    for row in csv_reader:
+        device = {
+            "host": row[0],
+            "username": getuser(),
+            "password": password,
+            "device_type": row[1]
+        }
+#The output file is created.
+        OutputDeviceFile = (r'C:\Netmiko\Device-' +row[0] + '_1')
+        iterativefilename()
+        NewFile.write("==========Contains the show results of device" + row[0] + "============" +"\n\n")
+#The connection to the device is made, the show commands performed and the results written to the file.
+        net_connect = Netmiko(**device)
+        for command in commandfile:
+            print(net_connect.find_prompt())
+            output = net_connect.send_command(command)
+            print(output)
+            NewFile.write(output +"\n\n")
+            print()
+        net_connect.disconnect()
+        NewFile.write("\n\n")
+    NewFile.close()
